@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'pp04-pr-ctica-programada-04-carlosdani-tech\Seguridad\Seguridad.MiddlewareAutorizacion/**'
+      - 'Seguridad/Seguridad.MiddlewareAutorizacion/**'
 
 jobs:
   publicar:
