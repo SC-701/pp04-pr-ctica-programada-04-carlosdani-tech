@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'C:\Users\cdani\OneDrive\Escritorio\WebAvanzado\pp04-pr-ctica-programada-04-carlosdani-tech\Seguridad\Seguridad.MiddlewareAutorizacion/**'
+      - 'pp04-pr-ctica-programada-04-carlosdani-tech\Seguridad\Seguridad.MiddlewareAutorizacion/**'
 
 jobs:
   publicar:
