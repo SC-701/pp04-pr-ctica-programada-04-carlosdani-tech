@@ -1,0 +1,9 @@
+﻿
+@if (User.Identity.IsAuthenticated)
+{
+ <span class="autenticacion">@User.Identity.Name, Sesión Iniciada <a asp-page="/cuenta/logout">Cerrar Sesión</a></span>   
+}
+else
+{
+ <span class="autenticacion">Usuario no autenticado <a asp-page="/cuenta/login">Iniciar Sesión</a></span>   
+}
