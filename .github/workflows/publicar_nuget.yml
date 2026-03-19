@@ -31,11 +31,11 @@ jobs:
             "https://nuget.pkg.github.com/Drojascode/index.json"
 
       - name: Restaurar dependencias
-        working-directory: CodigoBase/Ejemplos/Seguridad/Seguridad.MiddlewareAutorizacion
+        working-directory: Seguridad/Seguridad.MiddlewareAutorizacion
         run: dotnet restore
 
       - name: Empaquetar (en orden de dependencia)
-        working-directory: CodigoBase/Ejemplos/Seguridad/Seguridad.MiddlewareAutorizacion
+        working-directory: Seguridad/Seguridad.MiddlewareAutorizacion
         run: |
           dotnet pack Autorizacion.Abstracciones/Autorizacion.Abstracciones.csproj -c Release
           dotnet pack Autorizacion.DA/Autorizacion.DA.csproj                       -c Release
@@ -43,7 +43,7 @@ jobs:
           dotnet pack Autorizacion.Middleware/Autorizacion.Middleware.csproj       -c Release
 
       - name: Publicar paquetes
-        working-directory: CodigoBase/Ejemplos/Seguridad/Seguridad.MiddlewareAutorizacion
+        working-directory: Seguridad/Seguridad.MiddlewareAutorizacion
         run: |
           find . -name "*.nupkg" | while read pkg; do
             dotnet nuget push "$pkg" \
