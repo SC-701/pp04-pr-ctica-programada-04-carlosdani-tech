@@ -2,7 +2,6 @@ using Abstracciones.Interfaces.Reglas;
 using Abstracciones.Modelos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Net;
 using System.Text.Json;
 
 namespace Web.Pages.Vehiculos
@@ -11,7 +10,7 @@ namespace Web.Pages.Vehiculos
     {
         private readonly IConfiguracion _configuracion;
 
-        public VehiculoDetalle vehiculo { get; set; } = default!;
+        public VehiculoDetalle vehiculo { get; set; } = new();
 
         public DetalleModel(IConfiguracion configuracion)
         {
@@ -24,18 +23,17 @@ namespace Web.Pages.Vehiculos
                 return NotFound();
 
             string endpoint = _configuracion.ObtenerMetodo("ApiEndPoints", "ObtenerVehiculo");
-            var cliente = new HttpClient();
 
+            Console.WriteLine($"URL completa: {endpoint}");
+            System.Diagnostics.Debug.WriteLine($"URL completa: {endpoint}");
+
+            using var cliente = new HttpClient();
             var solicitud = new HttpRequestMessage(HttpMethod.Get, string.Format(endpoint, id));
             var respuesta = await cliente.SendAsync(solicitud);
-            if (respuesta.StatusCode == HttpStatusCode.NotFound)
-                return NotFound();
-
             respuesta.EnsureSuccessStatusCode();
             var resultado = await respuesta.Content.ReadAsStringAsync();
             var opciones = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            vehiculo = JsonSerializer.Deserialize<VehiculoDetalle>(resultado, opciones);
-
+            vehiculo = JsonSerializer.Deserialize<VehiculoDetalle>(resultado, opciones) ?? new VehiculoDetalle();
             return Page();
         }
     }

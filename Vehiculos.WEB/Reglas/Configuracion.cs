@@ -6,16 +6,16 @@ namespace Reglas
 {
     public class Configuracion : IConfiguracion
     {
-        private readonly IConfiguration _configuracion;
+        private readonly IConfiguration _configuration;
 
-        public Configuracion(IConfiguration configuracion)
+        public Configuracion(IConfiguration configuration)
         {
-            _configuracion = configuracion;
+            _configuration = configuration;
         }
 
         public string ObtenerMetodo(string seccion, string nombre)
         {
-            var apiEndPoint = _configuracion.GetSection(seccion).Get<APIEndPoint>();
+            var apiEndPoint = _configuration.GetSection(seccion).Get<APIEndPoint>();
             if (apiEndPoint == null)
                 return string.Empty;
 
@@ -27,6 +27,16 @@ namespace Reglas
                 return metodo;
 
             return $"{apiEndPoint.UrlBase.TrimEnd('/')}/{metodo.TrimStart('/')}";
+        }
+
+        private string? ObtenerUrlBase(string seccion)
+        {
+            return _configuration.GetSection(seccion).Get<APIEndPoint>()?.UrlBase;
+        }
+
+        public string ObtenerValor(string llave)
+        {
+            return _configuration.GetSection(llave).Value ?? string.Empty;
         }
     }
 }

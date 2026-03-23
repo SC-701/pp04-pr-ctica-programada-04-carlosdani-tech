@@ -12,6 +12,11 @@ namespace Web.Pages.Vehiculos
     {
         private readonly IConfiguracion _configuracion;
 
+        public AgregarModel(IConfiguracion configuracion)
+        {
+            _configuracion = configuracion;
+        }
+
         [BindProperty]
         public VehiculoRequest vehiculo { get; set; } = new();
 
@@ -22,73 +27,77 @@ namespace Web.Pages.Vehiculos
         public List<SelectListItem> modelos { get; set; } = new();
 
         [BindProperty]
-        public Guid marcaSeleccionada { get; set; }
+        public Guid marcaseleccionada { get; set; }
 
-        public AgregarModel(IConfiguracion configuracion)
+        public async Task<IActionResult> OnGet()
         {
-            _configuracion = configuracion;
-        }
-
-        public async Task<ActionResult> OnGet()
-        {
-            await ObtenerMarcasAsync();
+            await CargarFormulario();
             return Page();
         }
 
-        public async Task<ActionResult> OnPost()
+        public async Task<IActionResult> OnPost()
         {
             if (!ModelState.IsValid)
             {
-                await ObtenerMarcasAsync();
-                if (marcaSeleccionada != Guid.Empty)
-                {
-                    modelos = CrearOpcionesModelos(await ObtenerModelosAsync(marcaSeleccionada), vehiculo.IdModelo);
-                }
-
+                await CargarFormulario();
                 return Page();
             }
 
             string endpoint = _configuracion.ObtenerMetodo("ApiEndPoints", "AgregarVehiculo");
-            var cliente = new HttpClient();
-
+            using var cliente = new HttpClient();
             var respuesta = await cliente.PostAsJsonAsync(endpoint, vehiculo);
             respuesta.EnsureSuccessStatusCode();
             return RedirectToPage("./Index");
         }
 
-        private async Task ObtenerMarcasAsync()
+        private async Task CargarFormulario()
+        {
+            await ObtenerMarcas();
+
+            modelos = new List<SelectListItem>();
+            if (marcaseleccionada != Guid.Empty)
+            {
+                modelos = (await ObtenerModelos(marcaseleccionada)).Select(m => new SelectListItem
+                {
+                    Value = m.Id.ToString(),
+                    Text = m.Nombre,
+                    Selected = m.Id == vehiculo.IdModelo
+                }).ToList();
+            }
+        }
+
+        private async Task ObtenerMarcas()
         {
             string endpoint = _configuracion.ObtenerMetodo("ApiEndPoints", "ObtenerMarcas");
-            var cliente = new HttpClient();
+
+            Console.WriteLine($"URL completa: {endpoint}");
+            System.Diagnostics.Debug.WriteLine($"URL completa: {endpoint}");
+
+            using var cliente = new HttpClient();
             var solicitud = new HttpRequestMessage(HttpMethod.Get, endpoint);
 
             var respuesta = await cliente.SendAsync(solicitud);
             respuesta.EnsureSuccessStatusCode();
-            if (respuesta.StatusCode == HttpStatusCode.OK)
+            var resultado = await respuesta.Content.ReadAsStringAsync();
+            var opciones = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var resultadoDeserializado = JsonSerializer.Deserialize<List<Marca>>(resultado, opciones) ?? new List<Marca>();
+
+            marcas = resultadoDeserializado.Select(m => new SelectListItem
             {
-                var resultado = await respuesta.Content.ReadAsStringAsync();
-                var opciones = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var resultadoDeserializado = JsonSerializer.Deserialize<List<Marca>>(resultado, opciones) ?? new List<Marca>();
-                marcas = resultadoDeserializado.Select(a =>
-                                  new SelectListItem
-                                  {
-                                      Value = a.Id.ToString(),
-                                      Text = a.Nombre,
-                                      Selected = a.Id == marcaSeleccionada
-                                  }).ToList();
-            }
+                Value = m.Id.ToString(),
+                Text = m.Nombre,
+                Selected = m.Id == marcaseleccionada
+            }).ToList();
         }
 
-        public async Task<JsonResult> OnGetObtenerModelos(Guid marcaId)
-        {
-            var modelosResultado = await ObtenerModelosAsync(marcaId);
-            return new JsonResult(modelosResultado);
-        }
-
-        private async Task<List<Modelo>> ObtenerModelosAsync(Guid marcaId)
+        private async Task<List<Modelo>> ObtenerModelos(Guid marcaId)
         {
             string endpoint = _configuracion.ObtenerMetodo("ApiEndPoints", "ObtenerModelos");
-            var cliente = new HttpClient();
+
+            Console.WriteLine($"URL completa: {endpoint}");
+            System.Diagnostics.Debug.WriteLine($"URL completa: {endpoint}");
+
+            using var cliente = new HttpClient();
             var solicitud = new HttpRequestMessage(HttpMethod.Get, string.Format(endpoint, marcaId));
 
             var respuesta = await cliente.SendAsync(solicitud);
@@ -103,14 +112,10 @@ namespace Web.Pages.Vehiculos
             return new List<Modelo>();
         }
 
-        private static List<SelectListItem> CrearOpcionesModelos(IEnumerable<Modelo> modelos, Guid modeloSeleccionado)
+        public async Task<JsonResult> OnGetObtenerModelos(Guid marcaId)
         {
-            return modelos.Select(a => new SelectListItem
-            {
-                Value = a.Id.ToString(),
-                Text = a.Nombre,
-                Selected = a.Id == modeloSeleccionado
-            }).ToList();
+            var modelos = await ObtenerModelos(marcaId);
+            return new JsonResult(modelos);
         }
     }
 }
