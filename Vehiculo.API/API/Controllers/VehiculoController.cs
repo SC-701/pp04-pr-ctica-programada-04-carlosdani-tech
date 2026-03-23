@@ -21,7 +21,7 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "2")]
+        [Authorize(Roles = "1")]
         public async Task<IActionResult> Agregar([FromBody]VehiculoRequest vehiculo)
         {
             var resultado = await _vehiculoFlujo.Agregar(vehiculo);
@@ -29,7 +29,7 @@ namespace API.Controllers
         }
 
         [HttpPut("{Id}")]
-        [Authorize(Roles = "2")]
+        [Authorize(Roles = "1")]
         public async Task<IActionResult> Editar([FromRoute]Guid Id, [FromBody]VehiculoRequest vehiculo)
         {
             if (!await VerificarVehiculoExiste(Id))
@@ -39,7 +39,7 @@ namespace API.Controllers
         }
 
         [HttpDelete("{Id}")]
-        [Authorize(Roles = "2")]
+        [Authorize(Roles = "1")]
         public async Task<IActionResult> Eliminar([FromRoute]Guid Id)
         {
             if (!await VerificarVehiculoExiste(Id))

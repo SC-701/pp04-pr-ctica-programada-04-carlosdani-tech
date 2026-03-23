@@ -1,16 +1,18 @@
+using System.Net.Http.Headers;
+using System.Text.Json;
 using Abstracciones.Interfaces.Reglas;
 using Abstracciones.Modelos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Text.Json;
 
 namespace Web.Pages.Vehiculos
 {
+    [Authorize]
     public class DetalleModel : PageModel
     {
         private readonly IConfiguracion _configuracion;
-
-        public VehiculoDetalle vehiculo { get; set; } = new();
+        public VehiculoResponse vehiculo { get; set; } = new();
 
         public DetalleModel(IConfiguracion configuracion)
         {
@@ -24,17 +26,28 @@ namespace Web.Pages.Vehiculos
 
             string endpoint = _configuracion.ObtenerMetodo("ApiEndPoints", "ObtenerVehiculo");
 
-            Console.WriteLine($"URL completa: {endpoint}");
-            System.Diagnostics.Debug.WriteLine($"URL completa: {endpoint}");
-
-            using var cliente = new HttpClient();
+            using var cliente = ObtenerClienteConToken();
             var solicitud = new HttpRequestMessage(HttpMethod.Get, string.Format(endpoint, id));
             var respuesta = await cliente.SendAsync(solicitud);
             respuesta.EnsureSuccessStatusCode();
             var resultado = await respuesta.Content.ReadAsStringAsync();
             var opciones = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            vehiculo = JsonSerializer.Deserialize<VehiculoDetalle>(resultado, opciones) ?? new VehiculoDetalle();
+            vehiculo = JsonSerializer.Deserialize<VehiculoResponse>(resultado, opciones) ?? new VehiculoResponse();
+
             return Page();
+        }
+
+        private HttpClient ObtenerClienteConToken()
+        {
+            var tokenClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "Token");
+            var cliente = new HttpClient();
+
+            if (!string.IsNullOrWhiteSpace(tokenClaim?.Value))
+            {
+                cliente.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenClaim.Value);
+            }
+
+            return cliente;
         }
     }
 }
