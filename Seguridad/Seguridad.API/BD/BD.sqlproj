@@ -67,5 +67,15 @@
     <Build Include="dbo\Stored Procedures\ObtenerUsuario.sql" />
     <Build Include="dbo\Stored Procedures\ObtenerPerfilesxUsuario.sql" />
     <Build Include="dbo\Stored Procedures\AgregarUsuario.sql" />
+    <Build Include="dbo\Tables\Vehiculo.sql" />
+    <Build Include="dbo\Tables\Modelos.sql" />
+    <Build Include="dbo\Tables\Marcas.sql" />
+    <Build Include="dbo\Stored Procedures\ObtenerVehiculos.sql" />
+    <Build Include="dbo\Stored Procedures\ObtenerVehiculo.sql" />
+    <Build Include="dbo\Stored Procedures\ObtenerModelos.sql" />
+    <Build Include="dbo\Stored Procedures\ObtenerMarcas.sql" />
+    <Build Include="dbo\Stored Procedures\EliminarVehiculo.sql" />
+    <Build Include="dbo\Stored Procedures\EditarVehiculo.sql" />
+    <Build Include="dbo\Stored Procedures\AgregarVehiculo.sql" />
   </ItemGroup>
 </Project>
